@@ -2,7 +2,7 @@
 using System.Data.SQLite;
 using System.Data;
 using System;
-using System.Runtime.Remoting.Messaging;
+using System.Runtime.ConstrainedExecution;
 
 
 namespace VTMonitoringCrossroads
@@ -24,7 +24,7 @@ namespace VTMonitoringCrossroads
                         {
                             while (reader.Read())
                             {
-                                response = reader.GetValue(0);
+                                response = reader.GetInt64(0);
                             }
                         }
                     }
@@ -47,12 +47,16 @@ namespace VTMonitoringCrossroads
 
         public static string ArchiveDepthSeconds()
         {
-            //string oldEntry = "SELECT CHECKTIME FROM CARS LIMIT 1";
+            string oldEntry = "SELECT CHECKTIME FROM CARS LIMIT 1";
             string lastEntry = "SELECT CHECKTIME FROM CARS ORDER BY CHECKTIME DESC LIMIT 1";
 
-            //DateTime archiveOld = DateTime.FromFileTime((long)SQLQuery(oldEntry));
+            DateTime timeOld = DateTime.FromFileTime(Convert.ToInt64(SQLQuery(oldEntry)));
+            DateTime timeLast = DateTime.FromFileTime(Convert.ToInt64(SQLQuery(lastEntry)));
 
-            return lastEntry;
+            //TimeSpan ts = TimeSpan.FromSeconds(timeLast.Subtract(timeOld).TotalSeconds);
+            string strinngTime = timeLast.Subtract(timeOld).TotalSeconds.ToString();
+
+            return strinngTime.Remove(strinngTime.IndexOf(','));
         }
 
         public static string ArchiveDepthCount()
