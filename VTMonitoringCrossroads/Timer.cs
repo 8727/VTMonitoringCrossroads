@@ -7,6 +7,16 @@ namespace VTMonitoringCrossroads
 {
     internal class Timer
     {
+        public static void OnRecognizingCameraStatusTimer(Object source, ElapsedEventArgs e)
+        {
+            ICollection recognizingCameraKeys = Service.RecognizingCamera.Keys;
+            foreach (string ipRecognizingCameraKey in recognizingCameraKeys)
+            {
+                string id = Service.RecognizingCamera[ipRecognizingCameraKey].ToString();
+                Service.RecognizingCameraStatus[ipRecognizingCameraKey] = SqlLite.NumberOfCars(id);
+            }
+        }
+
         public static void OnViewCameraStatusTimer(Object source, ElapsedEventArgs e)
         {
             ICollection viewCameraKeys = Service.ViewCamera.Keys;
@@ -37,11 +47,16 @@ namespace VTMonitoringCrossroads
             Service.StatusJson["ArchiveDepthCount"] =  SqlLite.ArchiveDepthCount();
             TimeSpan depthSeconds = TimeSpan.FromSeconds(Convert.ToDouble(Service.StatusJson["ArchiveDepthSeconds"]));
             Logs.WriteLine($"Storage depth: time {depthSeconds}, number {Service.StatusJson["ArchiveDepthCount"]}.");
+//-------------------------------------------------------------------------------------------------
+            Service.StatusJson["ArchiveNumberOfCarsOfTheFuture"] = SqlLite.ArchiveNumberOfCarsOfTheFuture();
+            Service.StatusJson["ArchiveNumberOfCarsOfThePast"] = SqlLite.ArchiveNumberOfCarsOfThePast();
+            Logs.WriteLine($"Archive number of cars from the future {Service.StatusJson["ArchiveNumberOfCarsOfTheFuture"]}, archive number of cars from the past {Service.StatusJson["ArchiveNumberOfCarsOfThePast"]}.");
+
+
+
+
+
+            Logs.WriteLine("-------------------------------------------------------------------------------");
         }
-
-
-
-
-
     }
 }

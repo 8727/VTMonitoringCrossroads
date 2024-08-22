@@ -38,13 +38,7 @@ namespace VTMonitoringCrossroads
             string key = HttpResponse.Request.QueryString["key"];
             string json = "{\n\t\"dateTime\":\"" + DateTime.Now.ToString() + "\"";
 
-            //switch (key.ToLower())
-            //{
-            //    case "violation":
-
-            //        break;
-            //    default:
-                    json += ",\n\t\"upTime\":\"" + Service.StatusJson["UpTime"] + "\"";
+            json += ",\n\t\"upTime\":\"" + Service.StatusJson["UpTime"] + "\"";
 
             json += ",\n\t\"diskTotalSize\":\"" + Service.StatusJson["DiskTotalSize"] + "\"";
             json += ",\n\t\"diskTotalFreeSpace\":\"" + Service.StatusJson["DiskTotalFreeSpace"] + "\"";
@@ -57,8 +51,36 @@ namespace VTMonitoringCrossroads
             json += ",\n\t\"archiveDepthSeconds\":\"" + Service.StatusJson["ArchiveDepthSeconds"] + "\"";
             json += ",\n\t\"archiveDepthCount\":\"" + Service.StatusJson["ArchiveDepthCount"] + "\"";
 
-            //        break;
-            //}
+            json += ",\n\t\"archiveNumberOfCarsOfTheFuture\":\"" + Service.StatusJson["ArchiveNumberOfCarsOfTheFuture"] + "\"";
+            json += ",\n\t\"archiveNumberOfCarsOfThePast\":\"" + Service.StatusJson["ArchiveNumberOfCarsOfThePast"] + "\"";
+
+            
+
+            json += ",\n\t\"recognizingCamera\":[\n\t";
+            int r = 0;
+            foreach (DictionaryEntry RecognizingCameraStatusKey in Service.RecognizingCameraStatus)
+            {
+                r++;
+                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraStatusKey.Key + "\",\n\t\t\"status\":" + RecognizingCameraStatusKey.Value + "\n\t\t}";
+                if (r < Service.RecognizingCameraStatus.Count)
+                {
+                    json += ",";
+                }
+            }
+            json += "\n\t]";
+
+            json += ",\n\t\"numberOfOverviewImages\":[\n\t";
+            int v = 0;
+            foreach (DictionaryEntry RecognizingCameraViewCountKey in Service.RecognizingCameraViewCount)
+            {
+                v++;
+                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraViewCountKey.Key + "\",\n\t\t\"status\":" + RecognizingCameraViewCountKey.Value + "\n\t\t}";
+                if (v < Service.RecognizingCameraViewCount.Count)
+                {
+                    json += ",";
+                }
+            }
+            json += "\n\t]";
 
             json += ",\n\t\"viewCamera\":[\n\t";
             int c = 0;

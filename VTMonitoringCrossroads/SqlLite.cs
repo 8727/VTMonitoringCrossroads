@@ -1,9 +1,7 @@
-﻿using System.Data.SqlClient;
-using System.Data.SQLite;
+﻿using System;
 using System.Data;
-using System;
-using System.Runtime.ConstrainedExecution;
-
+using System.Data.SQLite;
+using System.Data.SqlClient;
 
 namespace VTMonitoringCrossroads
 {
@@ -45,6 +43,42 @@ namespace VTMonitoringCrossroads
             return response;
         }
 
+        static object SQLQueryString(string query)
+        {
+            object response = -1;
+            using (var connection = new SQLiteConnection($@"URI=file:{Service.installDir}Database\vtvehicledb.sqlite"))
+            {
+                try
+                {
+                    connection.Open();
+                    SQLiteCommand command = new SQLiteCommand(query, connection);
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                response = reader.GetValue(0);
+                            }
+                        }
+                    }
+                }
+                catch (SqlException)
+                {
+                    Logs.WriteLine($"********** No connection to SQL Server **********");
+                    connection.Close();
+                }
+                finally
+                {
+                    if (connection.State == ConnectionState.Open)
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+            return response;
+        }
+
         public static string ArchiveDepthSeconds()
         {
             string oldEntry = "SELECT CHECKTIME FROM CARS LIMIT 1";
@@ -65,6 +99,36 @@ namespace VTMonitoringCrossroads
             return SQLQuery(sqlQuery).ToString();
         }
 
+        public static string NumberOfCars(string id)
+        {
+            DateTime dateTime = DateTime.Now.AddSeconds(-15);
+            long timeLast = dateTime.ToFileTime();
+            long timeOld = dateTime.AddHours (-1).ToFileTime();
+            Logs.WriteLine($">>>>> Last time  {timeLast},  Old time {timeOld}.");
+            string sqlQuery = $"SELECT COUNT(CARS_ID) FROM CARS WHERE CHANNEL_ID = '{id}' AND CHECKTIME < {timeLast} AND CHECKTIME > {timeOld}";
+            return SQLQuery(sqlQuery).ToString();
+        }
+
+        public static string PathToLastFolder(string id)
+        {
+            string sqlQuery = $"SELECT SCREENSHOT FROM CARS WHERE CHANNEL_ID = '{id}' ORDER BY CHECKTIME DESC LIMIT 1";
+            string pach = SQLQueryString(sqlQuery).ToString();
+            return pach.Remove(pach.LastIndexOf('\\'));
+        }
+
+        public static string ArchiveNumberOfCarsOfTheFuture()
+        {
+            long dateTime = DateTime.Now.AddMinutes(10).ToFileTime();
+            string sqlQuery = $"SELECT COUNT(CARS_ID) FROM CARS WHERE CHECKTIME > {dateTime}";
+            return SQLQuery(sqlQuery).ToString();
+        }
+
+        public static string ArchiveNumberOfCarsOfThePast()
+        {
+            long dateTime = DateTime.Now.AddYears(-1).ToFileTime();
+            string sqlQuery = $"SELECT COUNT(CARS_ID) FROM CARS WHERE CHECKTIME < {dateTime}";
+            return SQLQuery(sqlQuery).ToString();
+        }
 
 
     }

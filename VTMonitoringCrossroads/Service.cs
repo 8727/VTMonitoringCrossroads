@@ -22,6 +22,9 @@ namespace VTMonitoringCrossroads
         public static TimeSpan localZone = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now);
 
         public static Hashtable StatusJson = new Hashtable();
+        public static Hashtable RecognizingCamera = new Hashtable();
+        public static Hashtable RecognizingCameraStatus = new Hashtable();
+        public static Hashtable RecognizingCameraViewCount = new Hashtable();
         public static Hashtable ViewCamera = new Hashtable();
 
 
@@ -67,6 +70,56 @@ namespace VTMonitoringCrossroads
                     }
                 }
             }
+
+            if (File.Exists(installDir + @"Database\bpm.db"))
+            {
+                string sqlRecognizingCamera = "SELECT Id, IPAddress FROM Channel";
+                
+                using (var connection = new SQLiteConnection($@"URI=file:{installDir}Database\bpm.db"))
+                {
+                    try
+                    {
+                        connection.Open();
+                        SQLiteCommand command = new SQLiteCommand(sqlRecognizingCamera, connection);
+                        using (SQLiteDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                while (reader.Read())
+                                {
+                                    RecognizingCamera.Add(reader.GetValue(1).ToString(), reader.GetValue(0).ToString());
+                                    Logs.WriteLine($">>>>> Recognizing Camera {reader.GetValue(1)} added to status monitoring");
+                                    
+                                    string cars = SqlLite.NumberOfCars(reader.GetValue(0).ToString());
+                                    RecognizingCameraStatus.Add(reader.GetValue(1).ToString(), cars);
+                                    Logs.WriteLine($">>>>> The recognition camera {reader.GetValue(1)} recorded {cars} cars");
+
+                                    string imgCount = Request.NumberOfOverviewImages(reader.GetValue(0).ToString());
+                                    RecognizingCameraViewCount.Add(reader.GetValue(1).ToString(), imgCount);
+                                    Logs.WriteLine($">>>>> Number of overview photos: {imgCount}, camera {reader.GetValue(1)}");
+                                }
+                            }
+                        }
+                    }
+                    catch (SqlException)
+                    {
+                        Logs.WriteLine($"********** No connection to SQL Server **********");
+                        connection.Close();
+                    }
+                    finally
+                    {
+                        if (connection.State == ConnectionState.Open)
+                        {
+                            connection.Close();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Logs.WriteLine($"There is no database file {installDir} Database\\bpm.db or it is in a different folder.");
+            }
+
             if (File.Exists(installDir + @"Database\bpm.db"))
             {
                 string sqlViewCamera = "SELECT Connection FROM ViewCamera";
@@ -110,9 +163,14 @@ namespace VTMonitoringCrossroads
             }
             else
             {
-                Logs.WriteLine($"There is no database file {installDir} Database\\vtsettingsdb.sqlite or it is in a different folder.");
+                Logs.WriteLine($"There is no database file {installDir} Database\\bpm.db or it is in a different folder.");
             }
 
+            var recognizingCameraStatusTimer = new System.Timers.Timer(15 * 60000);
+            recognizingCameraStatusTimer.Elapsed += Timer.OnRecognizingCameraStatusTimer;
+            recognizingCameraStatusTimer.AutoReset = true;
+            recognizingCameraStatusTimer.Enabled = true;
+            Logs.WriteLine($">>>>> The number of registered vehicles is counted at 15 minute intervals.");
 
             var viewCameraStatusTimer = new System.Timers.Timer(5 * 60000);
             viewCameraStatusTimer.Elapsed += Timer.OnViewCameraStatusTimer;
@@ -146,6 +204,11 @@ namespace VTMonitoringCrossroads
 
             StatusJson.Add("ArchiveDepthSeconds", SqlLite.ArchiveDepthSeconds());
             StatusJson.Add("ArchiveDepthCount", SqlLite.ArchiveDepthCount());
+
+            StatusJson.Add("ArchiveNumberOfCarsOfTheFuture", SqlLite.ArchiveNumberOfCarsOfTheFuture());
+            StatusJson.Add("ArchiveNumberOfCarsOfThePast", SqlLite.ArchiveNumberOfCarsOfThePast());
+
+ 
 
         }
 

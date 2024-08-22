@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Configuration.Install;
 using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
+using System.Runtime.Remoting.Messaging;
 
 
 namespace VTMonitoringCrossroads
@@ -64,7 +66,15 @@ namespace VTMonitoringCrossroads
             return (counterReceived.NextValue() / 131_072.0);
         }
 
-
+        public static string NumberOfOverviewImages(string id)
+        {
+            string folder = Service.diskMonitoring + "\\" + SqlLite.PathToLastFolder(id);
+            if (Directory.Exists(folder))
+            {
+                return Directory.GetFiles(folder, "*View*").Length.ToString();
+            }
+            return "ERROR";
+        }
 
 
     }
