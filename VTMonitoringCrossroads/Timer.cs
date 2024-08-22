@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Timers;
 
@@ -13,7 +14,9 @@ namespace VTMonitoringCrossroads
             foreach (string ipRecognizingCameraKey in recognizingCameraKeys)
             {
                 string id = Service.RecognizingCamera[ipRecognizingCameraKey].ToString();
+                string imgCount = Request.NumberOfOverviewImages(id);
                 Service.RecognizingCameraStatus[ipRecognizingCameraKey] = SqlLite.NumberOfCars(id);
+                Service.RecognizingCameraViewCount[ipRecognizingCameraKey] = imgCount;
             }
         }
 

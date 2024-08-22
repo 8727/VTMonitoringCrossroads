@@ -61,7 +61,7 @@ namespace VTMonitoringCrossroads
             foreach (DictionaryEntry RecognizingCameraStatusKey in Service.RecognizingCameraStatus)
             {
                 r++;
-                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraStatusKey.Key + "\",\n\t\t\"status\":" + RecognizingCameraStatusKey.Value + "\n\t\t}";
+                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraStatusKey.Key + "\",\n\t\t\"status\":\"" + RecognizingCameraStatusKey.Value + "\"\n\t\t}";
                 if (r < Service.RecognizingCameraStatus.Count)
                 {
                     json += ",";
@@ -74,7 +74,7 @@ namespace VTMonitoringCrossroads
             foreach (DictionaryEntry RecognizingCameraViewCountKey in Service.RecognizingCameraViewCount)
             {
                 v++;
-                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraViewCountKey.Key + "\",\n\t\t\"status\":" + RecognizingCameraViewCountKey.Value + "\n\t\t}";
+                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraViewCountKey.Key + "\",\n\t\t\"status\":\"" + RecognizingCameraViewCountKey.Value + "\"\n\t\t}";
                 if (v < Service.RecognizingCameraViewCount.Count)
                 {
                     json += ",";
@@ -87,7 +87,7 @@ namespace VTMonitoringCrossroads
             foreach (DictionaryEntry ViewCameraKey in Service.ViewCamera)
             {
                 c++;
-                json += "\t{\n\t\t\"ip\":\"" + ViewCameraKey.Key + "\",\n\t\t\"status\":" + ViewCameraKey.Value + "\n\t\t}";
+                json += "\t{\n\t\t\"ip\":\"" + ViewCameraKey.Key + "\",\n\t\t\"status\":\"" + ViewCameraKey.Value + "\"\n\t\t}";
                 if (c < Service.ViewCamera.Count)
                 {
                     json += ",";

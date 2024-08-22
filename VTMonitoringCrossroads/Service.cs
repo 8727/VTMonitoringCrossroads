@@ -96,7 +96,7 @@ namespace VTMonitoringCrossroads
 
                                     string imgCount = Request.NumberOfOverviewImages(reader.GetValue(0).ToString());
                                     RecognizingCameraViewCount.Add(reader.GetValue(1).ToString(), imgCount);
-                                    Logs.WriteLine($">>>>> Number of overview photos: {imgCount}, camera {reader.GetValue(1)}");
+                                    //Logs.WriteLine($">>>>> Number of overview photos: {imgCount}, camera {reader.GetValue(1)}");
                                 }
                             }
                         }
@@ -166,11 +166,11 @@ namespace VTMonitoringCrossroads
                 Logs.WriteLine($"There is no database file {installDir} Database\\bpm.db or it is in a different folder.");
             }
 
-            var recognizingCameraStatusTimer = new System.Timers.Timer(15 * 60000);
+            var recognizingCameraStatusTimer = new System.Timers.Timer(5 * 60000);
             recognizingCameraStatusTimer.Elapsed += Timer.OnRecognizingCameraStatusTimer;
             recognizingCameraStatusTimer.AutoReset = true;
             recognizingCameraStatusTimer.Enabled = true;
-            Logs.WriteLine($">>>>> The number of registered vehicles is counted at 15 minute intervals.");
+            Logs.WriteLine($">>>>> The number of registered vehicles is counted at 5 minute intervals.");
 
             var viewCameraStatusTimer = new System.Timers.Timer(5 * 60000);
             viewCameraStatusTimer.Elapsed += Timer.OnViewCameraStatusTimer;
