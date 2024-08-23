@@ -204,10 +204,10 @@ namespace VTMonitoringCrossroads
                 Logs.WriteLine($"There is no database file {installDir} Database\\bpm.db or it is in a different folder.");
             }
 
-            var viewCameraStatusTimer = new System.Timers.Timer(5 * 60000);
-            viewCameraStatusTimer.Elapsed += Timer.OnPingTimer;
-            viewCameraStatusTimer.AutoReset = true;
-            viewCameraStatusTimer.Enabled = true;
+            var pingTimer = new System.Timers.Timer(5 * 60000);
+            pingTimer.Elapsed += Timer.OnPingTimer;
+            pingTimer.AutoReset = true;
+            pingTimer.Enabled = true;
 
             var hostStatusTimer = new System.Timers.Timer(dataUpdateInterval * 60000);
             hostStatusTimer.Elapsed += Timer.OnHostStatusTimer;
