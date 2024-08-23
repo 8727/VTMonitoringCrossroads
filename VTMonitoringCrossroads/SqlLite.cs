@@ -2,7 +2,6 @@
 using System.Data;
 using System.Data.SQLite;
 using System.Data.SqlClient;
-using System.Threading;
 
 namespace VTMonitoringCrossroads
 {
@@ -102,11 +101,10 @@ namespace VTMonitoringCrossroads
 
         public static string NumberOfCars(string id)
         {
-            DateTime dateTime = DateTime.Now;
-            Thread.Sleep(1000);
+            DateTime dateTime = DateTime.Now.AddMinutes(-1);
             long timeLast = dateTime.ToFileTime();
             long timeOld = dateTime.AddHours (-1).ToFileTime();
-            Logs.WriteLine($">>>>> Last time  {timeLast},  Old time {timeOld}.");
+            //Logs.WriteLine($">>>>> Last time  {timeLast},  Old time {timeOld}.");
             string sqlQuery = $"SELECT COUNT(CARS_ID) FROM CARS WHERE CHANNEL_ID = '{id}' AND CHECKTIME < {timeLast} AND CHECKTIME > {timeOld}";
             return SQLQuery(sqlQuery).ToString();
         }
@@ -120,7 +118,7 @@ namespace VTMonitoringCrossroads
 
         public static string ArchiveNumberOfCarsOfTheFuture()
         {
-            long dateTime = DateTime.Now.AddMinutes(10).ToFileTime();
+            long dateTime = DateTime.Now.AddHours(1).ToFileTime();
             string sqlQuery = $"SELECT COUNT(CARS_ID) FROM CARS WHERE CHECKTIME > {dateTime}";
             return SQLQuery(sqlQuery).ToString();
         }

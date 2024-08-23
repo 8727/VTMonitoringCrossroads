@@ -15,7 +15,7 @@ namespace VTMonitoringCrossroads
         static void ThreadWEBServer()
         {
             serverWeb = new HttpListener();
-            serverWeb.Prefixes.Add(@"http://+:8090/");
+            serverWeb.Prefixes.Add(@"http://+:8010/");
             serverWeb.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
             serverWeb.Start();
             while (Service.statusWeb)
@@ -35,7 +35,7 @@ namespace VTMonitoringCrossroads
         static void ListenerCallback(IAsyncResult result)
         {
             var HttpResponse = serverWeb.EndGetContext(result);
-            string key = HttpResponse.Request.QueryString["key"];
+            //string key = HttpResponse.Request.QueryString["key"];
             string json = "{\n\t\"dateTime\":\"" + DateTime.Now.ToString() + "\"";
 
             json += ",\n\t\"upTime\":\"" + Service.StatusJson["UpTime"] + "\"";
@@ -62,7 +62,7 @@ namespace VTMonitoringCrossroads
             foreach (DictionaryEntry RecognizingCameraStatusKey in Service.RecognizingCameraStatus)
             {
                 r++;
-                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraStatusKey.Key + "\",\n\t\t\"status\":\"" + RecognizingCameraStatusKey.Value + "\"\n\t\t}";
+                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraStatusKey.Key + "\",\n\t\t\"quantity\":\"" + RecognizingCameraStatusKey.Value + "\"\n\t\t}";
                 if (r < Service.RecognizingCameraStatus.Count)
                 {
                     json += ",";
@@ -75,7 +75,7 @@ namespace VTMonitoringCrossroads
             foreach (DictionaryEntry RecognizingCameraViewCountKey in Service.RecognizingCameraViewCount)
             {
                 v++;
-                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraViewCountKey.Key + "\",\n\t\t\"status\":\"" + RecognizingCameraViewCountKey.Value + "\"\n\t\t}";
+                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraViewCountKey.Key + "\",\n\t\t\"quantity\":\"" + RecognizingCameraViewCountKey.Value + "\"\n\t\t}";
                 if (v < Service.RecognizingCameraViewCount.Count)
                 {
                     json += ",";
