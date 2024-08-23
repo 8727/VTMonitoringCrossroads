@@ -33,7 +33,8 @@ namespace VTMonitoringCrossroads
         public static bool statusWeb = true;
         public static string installDir = "C:\\Vocord\\Vocord.Traffic Crossroads\\";
         public static string diskMonitoring = "E:\\";
-        public static string networkInterfaceForMonitoring = "Intel[R] I211 Gigabit Network Connection _2";
+        public static string networkMonitoring = "vEthernet (LAN)";
+        public static string ipTrafficLight = "192.168.88.39";
 
 
 
@@ -51,9 +52,7 @@ namespace VTMonitoringCrossroads
 
             if (ConfigurationManager.AppSettings.Count != 0)
             {
-                networkInterfaceForMonitoring = ConfigurationManager.AppSettings["NetworkInterfaceForMonitoring"];
-
-
+                networkMonitoring = ConfigurationManager.AppSettings["NetworkInterfaceForMonitoring"];
             }
 
             using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Vocord\VOCORD Traffic CrossRoads Server"))
@@ -166,6 +165,47 @@ namespace VTMonitoringCrossroads
                 Logs.WriteLine($"There is no database file {installDir} Database\\bpm.db or it is in a different folder.");
             }
 
+            if (File.Exists(installDir + @"Database\bpm.db"))
+            {
+                string sqlTrafficLight = "SELECT Ip FROM Modbus";
+
+                using (var connection = new SQLiteConnection($@"URI=file:{installDir}Database\bpm.db"))
+                {
+                    try
+                    {
+                        connection.Open();
+                        SQLiteCommand command = new SQLiteCommand(sqlTrafficLight, connection);
+                        using (SQLiteDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                while (reader.Read())
+                                {
+                                    ipTrafficLight = reader.GetValue(0).ToString();
+                                    Logs.WriteLine($">>>>> Traffic light {ipTrafficLight} added to status monitoring.");
+                                }
+                            }
+                        }
+                    }
+                    catch (SqlException)
+                    {
+                        Logs.WriteLine($"********** No connection to SQL Server **********");
+                        connection.Close();
+                    }
+                    finally
+                    {
+                        if (connection.State == ConnectionState.Open)
+                        {
+                            connection.Close();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Logs.WriteLine($"There is no database file {installDir} Database\\bpm.db or it is in a different folder.");
+            }
+
             var recognizingCameraStatusTimer = new System.Timers.Timer(5 * 60000);
             recognizingCameraStatusTimer.Elapsed += Timer.OnRecognizingCameraStatusTimer;
             recognizingCameraStatusTimer.AutoReset = true;
@@ -199,17 +239,18 @@ namespace VTMonitoringCrossroads
             StatusJson.Add("DiskPercentTotalSize", Request.GetDiskUsagePercentage().ToString());
             StatusJson.Add("DiskPercentTotalFreeSpace", Request.GetDiskPercentFreeSpace().ToString());
 
-            StatusJson.Add("NetworkSent", Request.GetNetworkSent().ToString());
-            StatusJson.Add("NetworkReceived", Request.GetNetworkReceived().ToString());
-
             StatusJson.Add("ArchiveDepthSeconds", SqlLite.ArchiveDepthSeconds());
             StatusJson.Add("ArchiveDepthCount", SqlLite.ArchiveDepthCount());
 
             StatusJson.Add("ArchiveNumberOfCarsOfTheFuture", SqlLite.ArchiveNumberOfCarsOfTheFuture());
             StatusJson.Add("ArchiveNumberOfCarsOfThePast", SqlLite.ArchiveNumberOfCarsOfThePast());
 
- 
+            string[] network = Request.GetNetwork();
+            StatusJson.Add("NetworkNetspeed", network[0]);
+            StatusJson.Add("NetworkReceived", network[1]);
+            StatusJson.Add("NetworkSent", network[2]);
 
+            StatusJson.Add("TrafficLight", Request.TrafficLight());
         }
 
 

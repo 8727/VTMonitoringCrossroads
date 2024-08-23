@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.SQLite;
 using System.Data.SqlClient;
+using System.Threading;
 
 namespace VTMonitoringCrossroads
 {
@@ -101,7 +102,8 @@ namespace VTMonitoringCrossroads
 
         public static string NumberOfCars(string id)
         {
-            DateTime dateTime = DateTime.Now.AddSeconds(-15);
+            DateTime dateTime = DateTime.Now;
+            Thread.Sleep(1000);
             long timeLast = dateTime.ToFileTime();
             long timeOld = dateTime.AddHours (-1).ToFileTime();
             Logs.WriteLine($">>>>> Last time  {timeLast},  Old time {timeOld}.");

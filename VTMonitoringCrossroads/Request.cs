@@ -2,8 +2,10 @@
 using System.Configuration.Install;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.Remoting.Messaging;
+using System.Threading;
 
 
 namespace VTMonitoringCrossroads
@@ -50,20 +52,31 @@ namespace VTMonitoringCrossroads
             return (100 - (driveInfo.TotalFreeSpace / (driveInfo.TotalSize / 100.0)));
         }
 
-        public static double GetNetworkSent()
+        public static string[] GetNetwork()
         {
-            PerformanceCounter counterSent = new PerformanceCounter("Network Interface", "Bytes Sent/sec", Service.networkInterfaceForMonitoring);
-            counterSent.NextValue();
-            counterSent.NextValue();
-            return (counterSent.NextValue() / 131_072.0);
-        }
+            long oldReceived = 0;
+            long oldSent = 0;
+            long lastReceived = 0;
+            long lastSent = 0;
+            UInt16 speed = 0;
 
-        public static double GetNetworkReceived()
-        {
-            PerformanceCounter counterReceived = new PerformanceCounter("Network Interface", "Bytes Received/sec", Service.networkInterfaceForMonitoring);
-            counterReceived.NextValue();
-            counterReceived.NextValue();
-            return (counterReceived.NextValue() / 131_072.0);
+            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (NetworkInterface adapter in adapters.Where(a => a.Name == Service.networkMonitoring))
+            {
+                var ipv4Info = adapter.GetIPv4Statistics();
+                oldReceived = ipv4Info.BytesReceived;
+                oldSent = ipv4Info.BytesSent;
+            }
+            Thread.Sleep(1000);
+            foreach (NetworkInterface adapter in adapters.Where(a => a.Name == Service.networkMonitoring))
+            {
+                var ipv4Info = adapter.GetIPv4Statistics();
+                lastReceived = ipv4Info.BytesReceived;
+                lastSent = ipv4Info.BytesSent;
+                speed = Convert.ToUInt16(adapter.Speed / 1000000);
+            }
+            string[] req = {speed.ToString(), ((lastReceived - oldReceived) / 131072.0).ToString(), ((lastSent - oldSent) / 131072.0).ToString() };
+            return req;
         }
 
         public static string NumberOfOverviewImages(string id)
@@ -76,6 +89,11 @@ namespace VTMonitoringCrossroads
             return "ERROR";
         }
 
+        public static string TrafficLight()
+        {
+            return GetPing(Service.ipTrafficLight).ToString();
+        }
+        
 
     }
 }

@@ -45,16 +45,17 @@ namespace VTMonitoringCrossroads
             json += ",\n\t\"diskPercentTotalSize\":\"" + Service.StatusJson["DiskPercentTotalSize"] + "\"";
             json += ",\n\t\"diskPercentTotalFreeSpace\":\"" + Service.StatusJson["DiskPercentTotalFreeSpace"] + "\"";
 
-            json += ",\n\t\"networkSent\":\"" + Service.StatusJson["NetworkSent"] + "\"";
-            json += ",\n\t\"networkReceived\":\"" + Service.StatusJson["NetworkReceived"] + "\"";
-
             json += ",\n\t\"archiveDepthSeconds\":\"" + Service.StatusJson["ArchiveDepthSeconds"] + "\"";
             json += ",\n\t\"archiveDepthCount\":\"" + Service.StatusJson["ArchiveDepthCount"] + "\"";
 
             json += ",\n\t\"archiveNumberOfCarsOfTheFuture\":\"" + Service.StatusJson["ArchiveNumberOfCarsOfTheFuture"] + "\"";
             json += ",\n\t\"archiveNumberOfCarsOfThePast\":\"" + Service.StatusJson["ArchiveNumberOfCarsOfThePast"] + "\"";
 
-            
+            json += ",\n\t\"networkNetspeed\":\"" + Service.StatusJson["NetworkNetspeed"] + "\"";
+            json += ",\n\t\"networkSent\":\"" + Service.StatusJson["NetworkSent"] + "\"";
+            json += ",\n\t\"networkReceived\":\"" + Service.StatusJson["NetworkReceived"] + "\"";
+
+            json += ",\n\t\"trafficLight\":\"" + Service.StatusJson["TrafficLight"] + "\"";
 
             json += ",\n\t\"recognizingCamera\":[\n\t";
             int r = 0;

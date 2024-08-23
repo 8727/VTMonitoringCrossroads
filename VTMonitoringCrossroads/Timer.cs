@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.Remoting.Messaging;
-using System.Threading;
 using System.Timers;
 
 namespace VTMonitoringCrossroads
@@ -42,22 +40,25 @@ namespace VTMonitoringCrossroads
             Logs.WriteLine($"Total disk size {Service.StatusJson["DiskTotalSize"]} GB, free space size {Service.StatusJson["DiskTotalFreeSpace"]} GB, disk size as a percentage {Service.StatusJson["DiskPercentSize"]}, free disk space percentage {Service.StatusJson["DiskPercentFreeSpace"]}.");
 //-------------------------------------------------------------------------------------------------
 
-            Service.StatusJson["NetworkSent"] = (Request.GetNetworkSent()).ToString();
-            Service.StatusJson["NetworkReceived"] = (Request.GetNetworkReceived()).ToString();
-            Logs.WriteLine($"Interface loading incoming {Service.StatusJson["NetworkReceived"]}, outgoing {Service.StatusJson["NetworkSent"]}.");
-//-------------------------------------------------------------------------------------------------
             Service.StatusJson["ArchiveDepthSeconds"] = SqlLite.ArchiveDepthSeconds();
             Service.StatusJson["ArchiveDepthCount"] =  SqlLite.ArchiveDepthCount();
             TimeSpan depthSeconds = TimeSpan.FromSeconds(Convert.ToDouble(Service.StatusJson["ArchiveDepthSeconds"]));
             Logs.WriteLine($"Storage depth: time {depthSeconds}, number {Service.StatusJson["ArchiveDepthCount"]}.");
 //-------------------------------------------------------------------------------------------------
+
             Service.StatusJson["ArchiveNumberOfCarsOfTheFuture"] = SqlLite.ArchiveNumberOfCarsOfTheFuture();
             Service.StatusJson["ArchiveNumberOfCarsOfThePast"] = SqlLite.ArchiveNumberOfCarsOfThePast();
             Logs.WriteLine($"Archive number of cars from the future {Service.StatusJson["ArchiveNumberOfCarsOfTheFuture"]}, archive number of cars from the past {Service.StatusJson["ArchiveNumberOfCarsOfThePast"]}.");
+//-------------------------------------------------------------------------------------------------
 
+            string[] network = Request.GetNetwork();
+            Service.StatusJson["NetworkNetspeed"] = network[0];
+            Service.StatusJson["NetworkReceived"] = network[1];
+            Service.StatusJson["NetworkSent"] = network[2];
+            Logs.WriteLine($"Interface loading incoming {Service.StatusJson["NetworkReceived"]}, outgoing {Service.StatusJson["NetworkSent"]}.");
+//-------------------------------------------------------------------------------------------------
 
-
-
+            Service.StatusJson["TrafficLight"] = Request.TrafficLight();
 
             Logs.WriteLine("-------------------------------------------------------------------------------");
         }
