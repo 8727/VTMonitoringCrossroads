@@ -27,16 +27,13 @@ namespace VTMonitoringCrossroads
         public static Hashtable RecognizingCameraViewCount = new Hashtable();
         public static Hashtable ViewCamera = new Hashtable();
 
-
-
         public static int storageDays = 30;
         public static bool statusWeb = true;
         public static string installDir = "C:\\Vocord\\Vocord.Traffic Crossroads\\";
         public static string diskMonitoring = "E:\\";
         public static string networkMonitoring = "vEthernet (LAN)";
+        public static int dataUpdateInterval = 5;
         public static string ipTrafficLight = "192.168.88.39";
-
-
 
         void LoadConfig()
         {
@@ -52,7 +49,8 @@ namespace VTMonitoringCrossroads
 
             if (ConfigurationManager.AppSettings.Count != 0)
             {
-                networkMonitoring = ConfigurationManager.AppSettings["NetworkInterfaceForMonitoring"];
+                networkMonitoring = ConfigurationManager.AppSettings["NetworkMonitoring"];
+                dataUpdateInterval = Convert.ToInt32(ConfigurationManager.AppSettings["DataUpdateIntervalMinutes"]);
             }
 
             using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Vocord\VOCORD Traffic CrossRoads Server"))
@@ -206,28 +204,18 @@ namespace VTMonitoringCrossroads
                 Logs.WriteLine($"There is no database file {installDir} Database\\bpm.db or it is in a different folder.");
             }
 
-            var recognizingCameraStatusTimer = new System.Timers.Timer(5 * 60000);
-            recognizingCameraStatusTimer.Elapsed += Timer.OnRecognizingCameraStatusTimer;
-            recognizingCameraStatusTimer.AutoReset = true;
-            recognizingCameraStatusTimer.Enabled = true;
-            Logs.WriteLine($">>>>> The number of registered vehicles is counted at 5 minute intervals.");
-
             var viewCameraStatusTimer = new System.Timers.Timer(5 * 60000);
-            viewCameraStatusTimer.Elapsed += Timer.OnViewCameraStatusTimer;
+            viewCameraStatusTimer.Elapsed += Timer.OnPingTimer;
             viewCameraStatusTimer.AutoReset = true;
             viewCameraStatusTimer.Enabled = true;
-            Logs.WriteLine($">>>>> Monitoring of surveillance cameras is enabled at intervals of 5 minutes");
 
-            var hostStatusTimer = new System.Timers.Timer(5 * 60000);
+            var hostStatusTimer = new System.Timers.Timer(dataUpdateInterval * 60000);
             hostStatusTimer.Elapsed += Timer.OnHostStatusTimer;
             hostStatusTimer.AutoReset = true;
             hostStatusTimer.Enabled = true;
-            Logs.WriteLine($">>>>> Host parameters monitoring is enabled at 5 minute intervals.");
 
-
-
+            Logs.WriteLine($">>>>> Monitoring host parameters at {dataUpdateInterval} minute intervals.");
             Logs.WriteLine("-------------------------------------------------------------------------------");
-
         }
 
         void CreatedStatusJson()
