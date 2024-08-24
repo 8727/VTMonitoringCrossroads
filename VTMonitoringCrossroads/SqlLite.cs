@@ -101,7 +101,7 @@ namespace VTMonitoringCrossroads
 
         public static string NumberOfCars(string id)
         {
-            DateTime dateTime = DateTime.Now.AddMinutes(-1);
+            DateTime dateTime = DateTime.UtcNow.AddSeconds(-30);
             long timeLast = dateTime.ToFileTime();
             long timeOld = dateTime.AddHours (-1).ToFileTime();
             //Logs.WriteLine($">>>>> Last time  {timeLast},  Old time {timeOld}.");
