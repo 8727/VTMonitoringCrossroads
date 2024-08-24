@@ -24,7 +24,7 @@ namespace VTMonitoringCrossroads
 
             Service.StatusJson["UpTime"] = Request.GetUpTime().ToString();
             TimeSpan uptime = TimeSpan.FromSeconds(Convert.ToDouble(Service.StatusJson["UpTime"]));
-            Logs.WriteLine($"Host uptime in seconds {uptime}.");
+            Logs.WriteLine($"Host uptime {uptime}.");
 //-------------------------------------------------------------------------------------------------
 
             Service.StatusJson["DiskTotalSize"] = (Request.GetDiskTotalSize() / 1_073_741_824.0).ToString();

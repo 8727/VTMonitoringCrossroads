@@ -27,7 +27,7 @@ namespace VTMonitoringCrossroads
         public static Hashtable RecognizingCameraViewCount = new Hashtable();
         public static Hashtable ViewCamera = new Hashtable();
 
-        public static int storageDays = 30;
+        public static int storageDays = 35;
         public static bool statusWeb = true;
         public static string installDir = "C:\\Vocord\\Vocord.Traffic Crossroads\\";
         public static string diskMonitoring = "E:\\";
