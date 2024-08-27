@@ -101,11 +101,8 @@ namespace VTMonitoringCrossroads
 
         public static string NumberOfCars(string id)
         {
-            DateTime dateTime = DateTime.UtcNow.AddSeconds(-30);
-            long timeLast = dateTime.ToFileTime();
-            long timeOld = dateTime.AddHours (-1).ToFileTime();
-            //Logs.WriteLine($">>>>> Last time  {timeLast},  Old time {timeOld}.");
-            string sqlQuery = $"SELECT COUNT(CARS_ID) FROM CARS WHERE CHANNEL_ID = '{id}' AND CHECKTIME < {timeLast} AND CHECKTIME > {timeOld}";
+            long dateTime = DateTime.UtcNow.AddHours(-1).ToFileTime();
+            string sqlQuery = $"SELECT COUNT(CARS_ID) FROM CARS WHERE CHANNEL_ID = '{id}' AND CHECKTIME > {dateTime}";
             return SQLQuery(sqlQuery).ToString();
         }
 
