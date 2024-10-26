@@ -14,6 +14,8 @@ namespace VTMonitoringCrossroads
 {
     public partial class Service : ServiceBase
     {
+        public static string version = "1.3";
+
         public Service()
         {
             InitializeComponent();
@@ -240,7 +242,6 @@ namespace VTMonitoringCrossroads
 
             StatusJson.Add("TrafficLight", Request.TrafficLight());
         }
-
 
         protected override void OnStart(string[] args)
         {
