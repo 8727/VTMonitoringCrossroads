@@ -1,20 +1,21 @@
 ﻿using System;
 using System.IO;
+using System.Data;
 using Microsoft.Win32;
 using System.Collections;
-using System.Configuration;
 using System.Data.SQLite;
+using System.Configuration;
+using System.Data.SqlClient;
 using System.ServiceProcess;
 using System.Text.RegularExpressions;
-using System.Data.SqlClient;
-using System.Data;
+using System.Xml;
 
 
 namespace VTMonitoringCrossroads
 {
     public partial class Service : ServiceBase
     {
-        public static string version = "1.3";
+        public static string version = "1.4";
 
         public Service()
         {
@@ -24,10 +25,17 @@ namespace VTMonitoringCrossroads
         public static TimeSpan localZone = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now);
 
         public static Hashtable StatusJson = new Hashtable();
+        
         public static Hashtable RecognizingCamera = new Hashtable();
         public static Hashtable RecognizingCameraStatus = new Hashtable();
         public static Hashtable RecognizingCameraViewCount = new Hashtable();
+
         public static Hashtable ViewCamera = new Hashtable();
+        
+        public static Hashtable TimeAccuracys = new Hashtable();
+        
+        public static Hashtable RedZona = new Hashtable();
+        public static Hashtable RedZonaStatus = new Hashtable();
 
         public static int storageDays = 35;
         public static bool statusWeb = true;
@@ -36,6 +44,87 @@ namespace VTMonitoringCrossroads
         public static string networkMonitoring = "vEthernet (LAN)";
         public static int dataUpdateInterval = 5;
         public static string ipTrafficLight = "192.168.88.39";
+        public static string ipTahiont = "192.168.88.20";
+        public static string ipCA = "192.168.88.30";
+
+        static string RoadLineNumber(string id)
+        {
+            string response = "-1";
+            string sqlRoadLine = $"SELECT ROADLINE_ID FROM ROADLINES WHERE ROADLINE_GUID = '{id}'";
+            using (var connection = new SQLiteConnection($@"URI=file:{installDir}Database\vtsettingsdb.sqlite"))
+            {
+                try
+                {
+                    connection.Open();
+                    SQLiteCommand command = new SQLiteCommand(sqlRoadLine, connection);
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                response = reader.GetValue(0).ToString();
+                            }
+                        }
+                    }
+                }
+                catch (SqlException)
+                {
+                    connection.Close();
+                }
+                finally
+                {
+                    if (connection.State == ConnectionState.Open)
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+            return response;
+        }
+
+        static string GetRoadLine(string channelId)
+        {
+            string response = "-1";
+            string sqlRoadLine = $"SELECT ID, XML FROM ZONE WHERE CHANNELID = '{channelId}' AND TYPE = 11";
+            using (var connection = new SQLiteConnection($@"URI=file:{installDir}Database\bpm.db"))
+            {
+                try
+                {
+                    connection.Open();
+                    SQLiteCommand command = new SQLiteCommand(sqlRoadLine, connection);
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        XmlDocument xmlDoc = new XmlDocument();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                xmlDoc.LoadXml(reader.GetValue(1).ToString());
+                                if (xmlDoc.SelectSingleNode("//LineNumber").InnerText != "0")
+                                {
+                                    response = RoadLineNumber(reader.GetValue(0).ToString());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (SqlException)
+                {
+                    connection.Close();
+                }
+                finally
+                {
+                    if (connection.State == ConnectionState.Open)
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+            return response;
+        }
+
 
         void LoadConfig()
         {
@@ -53,6 +142,9 @@ namespace VTMonitoringCrossroads
             {
                 networkMonitoring = ConfigurationManager.AppSettings["NetworkMonitoring"];
                 dataUpdateInterval = Convert.ToInt32(ConfigurationManager.AppSettings["DataUpdateIntervalMinutes"]);
+
+                ipTahiont = ConfigurationManager.AppSettings["IpTahiont"];
+                ipCA = ConfigurationManager.AppSettings["IpCA"];
             }
 
             using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Vocord\VOCORD Traffic CrossRoads Server"))
@@ -87,15 +179,19 @@ namespace VTMonitoringCrossroads
                                 while (reader.Read())
                                 {
                                     RecognizingCamera.Add(reader.GetValue(1).ToString(), reader.GetValue(0).ToString());
-                                    Logs.WriteLine($">>>>> Recognizing Camera {reader.GetValue(1)} added to status monitoring");
+                                    //Logs.WriteLine($">>>>> Recognizing Camera {reader.GetValue(1)} added to status monitoring");
                                     
                                     string cars = SqlLite.NumberOfCars(reader.GetValue(0).ToString());
                                     RecognizingCameraStatus.Add(reader.GetValue(1).ToString(), cars);
-                                    Logs.WriteLine($">>>>> The recognition camera {reader.GetValue(1)} recorded {cars} cars");
+                                    Logs.WriteLine($">>>>> Recognizing Camera {reader.GetValue(1)} added to status monitoring, recorded {cars} cars");
 
                                     string imgCount = Request.NumberOfOverviewImages(reader.GetValue(0).ToString());
                                     RecognizingCameraViewCount.Add(reader.GetValue(1).ToString(), imgCount);
-                                    //Logs.WriteLine($">>>>> Number of overview photos: {imgCount}, camera {reader.GetValue(1)}");
+                                    
+                                    TimeAccuracy.AddFactorTimes(reader.GetValue(1).ToString());
+                                    
+                                    RedZona.Add(reader.GetValue(1).ToString(), GetRoadLine(reader.GetValue(0).ToString()));
+                                    RedZonaStatus.Add(reader.GetValue(1).ToString(), SqlLite.CheckingTheRedZone(reader.GetValue(0).ToString(), RedZona[reader.GetValue(1).ToString()].ToString()));
                                 }
                             }
                         }
@@ -118,6 +214,9 @@ namespace VTMonitoringCrossroads
             {
                 Logs.WriteLine($"There is no database file {installDir} Database\\bpm.db or it is in a different folder.");
             }
+
+            TimeAccuracy.AddWinTime(ipTahiont, $"http://{ipTahiont}:8020");
+            TimeAccuracy.AddWinTime(ipCA, $"http://{ipCA}:8030");
 
             if (File.Exists(installDir + @"Database\bpm.db"))
             {

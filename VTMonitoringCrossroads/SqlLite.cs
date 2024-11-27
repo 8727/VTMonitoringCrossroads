@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.SQLite;
 using System.Data.SqlClient;
+using System.Runtime.Remoting.Messaging;
 
 namespace VTMonitoringCrossroads
 {
@@ -104,6 +105,22 @@ namespace VTMonitoringCrossroads
             long dateTime = DateTime.UtcNow.AddHours(-1).ToFileTime();
             string sqlQuery = $"SELECT COUNT(CARS_ID) FROM CARS WHERE CHANNEL_ID = '{id}' AND CHECKTIME > {dateTime}";
             return SQLQuery(sqlQuery).ToString();
+        }
+
+        public static string CheckingTheRedZone(string id, string line)
+        {
+            string response = "100,00";
+            if (line != "-1")
+            {
+                long dateTime = DateTime.UtcNow.AddHours(-1).ToFileTime();
+                string sqlQuery = $"SELECT round(100 * (SELECT COUNT(*) FROM CARS WHERE CHANNEL_ID = '{id}' AND ROADLINE = {line} AND CHECKTIME > {dateTime} AND ALARM14 = 1) / ((SELECT COUNT(*) FROM CARS WHERE CHANNEL_ID = '{id}' AND ROADLINE = {line} AND CHECKTIME > {dateTime})+0.0), 2) as body";
+                response = SQLQueryString(sqlQuery).ToString();
+            }
+            if(response == "")
+            {
+                response = "0,00";
+            }
+            return response;
         }
 
         public static string PathToLastFolder(string id)

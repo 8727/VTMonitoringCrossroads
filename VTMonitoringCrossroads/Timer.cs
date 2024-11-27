@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Threading;
 using System.Timers;
 
 namespace VTMonitoringCrossroads
@@ -68,10 +67,19 @@ namespace VTMonitoringCrossroads
                 string imgCount = Request.NumberOfOverviewImages(id);
                 Service.RecognizingCameraStatus[ipRecognizingCameraKey] = SqlLite.NumberOfCars(id);
                 Service.RecognizingCameraViewCount[ipRecognizingCameraKey] = imgCount;
+                TimeAccuracy.SetFactorTimes(ipRecognizingCameraKey);
 
-                Logs.WriteLine($"Camera recognition {ipRecognizingCameraKey}, number of cars {Service.RecognizingCameraStatus[ipRecognizingCameraKey]}, number of overview photos {imgCount}.");
+                string percentageRedZona = SqlLite.CheckingTheRedZone(id, Service.RedZona[ipRecognizingCameraKey].ToString());
+                Service.RedZonaStatus[ipRecognizingCameraKey] = percentageRedZona;
+
+                Logs.WriteLine($"Camera recognition {ipRecognizingCameraKey}, number of cars {Service.RecognizingCameraStatus[ipRecognizingCameraKey]}, number of overview photos {imgCount}, time difference {Service.TimeAccuracys[ipRecognizingCameraKey]} seconds, {percentageRedZona} percentage in the red light zone.");
             }
-//-------------------------------------------------------------------------------------------------
+
+            TimeAccuracy.SetWinTime(Service.ipTahiont, $"http://{Service.ipTahiont}:8020");
+            Logs.WriteLine($"The time difference on server {Service.ipTahiont} is {Service.TimeAccuracys[Service.ipTahiont]} seconds.");
+            TimeAccuracy.SetWinTime(Service.ipCA, $"http://{Service.ipCA}:8030");
+            Logs.WriteLine($"The time difference on server {Service.ipCA} is {Service.TimeAccuracys[Service.ipCA]} seconds.");
+            //-------------------------------------------------------------------------------------------------
 
             foreach (string ipViewCameraKey in viewCameraKeys)
             {

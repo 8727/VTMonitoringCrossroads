@@ -59,12 +59,12 @@ namespace VTMonitoringCrossroads
 
             json += ",\n\t\"trafficLight\":\"" + Service.StatusJson["TrafficLight"] + "\"";
 
-            json += ",\n\t\"recognizingCamera\":[\n\t";
+            json += ",\n\t\"recognizingCamera\":[";
             int r = 0;
             foreach (DictionaryEntry RecognizingCameraStatusKey in Service.RecognizingCameraStatus)
             {
                 r++;
-                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraStatusKey.Key + "\",\n\t\t\"quantity\":\"" + RecognizingCameraStatusKey.Value + "\"\n\t\t}";
+                json += "\n\t\t{\n\t\t\t\"ip\":\"" + RecognizingCameraStatusKey.Key + "\",\n\t\t\t\"quantity\":\"" + RecognizingCameraStatusKey.Value + "\"\n\t\t}";
                 if (r < Service.RecognizingCameraStatus.Count)
                 {
                     json += ",";
@@ -72,26 +72,52 @@ namespace VTMonitoringCrossroads
             }
             json += "\n\t]";
 
-            json += ",\n\t\"numberOfOverviewImages\":[\n\t";
-            int v = 0;
-            foreach (DictionaryEntry RecognizingCameraViewCountKey in Service.RecognizingCameraViewCount)
+            json += ",\n\t\"timeAccuracy\":[";
+            int t = 0;
+            foreach (DictionaryEntry TimeAccuracysKey in Service.TimeAccuracys)
             {
-                v++;
-                json += "\t{\n\t\t\"ip\":\"" + RecognizingCameraViewCountKey.Key + "\",\n\t\t\"quantity\":\"" + RecognizingCameraViewCountKey.Value + "\"\n\t\t}";
-                if (v < Service.RecognizingCameraViewCount.Count)
+                t++;
+                json += "\n\t\t{\n\t\t\t\"ip\":\"" + TimeAccuracysKey.Key + "\",\n\t\t\t\"quantity\":\"" + TimeAccuracysKey.Value + "\"\n\t\t}";
+                if (t < Service.TimeAccuracys.Count)
                 {
                     json += ",";
                 }
             }
             json += "\n\t]";
 
-            json += ",\n\t\"viewCamera\":[\n\t";
+            json += ",\n\t\"percentageRedZone\":[";
+            int z = 0;
+            foreach (DictionaryEntry RedZonaStatusKey in Service.RedZonaStatus)
+            {
+                z++;
+                json += "\n\t\t{\n\t\t\t\"ip\":\"" + RedZonaStatusKey.Key + "\",\n\t\t\t\"quantity\":\"" + RedZonaStatusKey.Value + "\"\n\t\t}";
+                if (z < Service.RedZonaStatus.Count)
+                {
+                    json += ",";
+                }
+            }
+            json += "\n\t]";
+
+            json += ",\n\t\"viewCamera\":[";
             int c = 0;
             foreach (DictionaryEntry ViewCameraKey in Service.ViewCamera)
             {
                 c++;
-                json += "\t{\n\t\t\"ip\":\"" + ViewCameraKey.Key + "\",\n\t\t\"status\":\"" + ViewCameraKey.Value + "\"\n\t\t}";
+                json += "\n\t\t{\n\t\t\t\"ip\":\"" + ViewCameraKey.Key + "\",\n\t\t\t\"status\":\"" + ViewCameraKey.Value + "\"\n\t\t}";
                 if (c < Service.ViewCamera.Count)
+                {
+                    json += ",";
+                }
+            }
+            json += "\n\t]";
+
+            json += ",\n\t\"numberOfOverviewImages\":[";
+            int v = 0;
+            foreach (DictionaryEntry RecognizingCameraViewCountKey in Service.RecognizingCameraViewCount)
+            {
+                v++;
+                json += "\n\t\t{\n\t\t\t\"ip\":\"" + RecognizingCameraViewCountKey.Key + "\",\n\t\t\t\"quantity\":\"" + RecognizingCameraViewCountKey.Value + "\"\n\t\t}";
+                if (v < Service.RecognizingCameraViewCount.Count)
                 {
                     json += ",";
                 }

@@ -90,6 +90,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlLite.cs" />
+    <Compile Include="TimeAccuracy.cs" />
     <Compile Include="Timer.cs" />
     <Compile Include="Web.cs" />
   </ItemGroup>
