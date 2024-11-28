@@ -179,19 +179,20 @@ namespace VTMonitoringCrossroads
                                 while (reader.Read())
                                 {
                                     RecognizingCamera.Add(reader.GetValue(1).ToString(), reader.GetValue(0).ToString());
-                                    //Logs.WriteLine($">>>>> Recognizing Camera {reader.GetValue(1)} added to status monitoring");
-                                    
+
                                     string cars = SqlLite.NumberOfCars(reader.GetValue(0).ToString());
                                     RecognizingCameraStatus.Add(reader.GetValue(1).ToString(), cars);
-                                    Logs.WriteLine($">>>>> Recognizing Camera {reader.GetValue(1)} added to status monitoring, recorded {cars} cars");
 
                                     string imgCount = Request.NumberOfOverviewImages(reader.GetValue(0).ToString());
                                     RecognizingCameraViewCount.Add(reader.GetValue(1).ToString(), imgCount);
-                                    
+
                                     TimeAccuracy.AddFactorTimes(reader.GetValue(1).ToString());
-                                    
+
                                     RedZona.Add(reader.GetValue(1).ToString(), GetRoadLine(reader.GetValue(0).ToString()));
-                                    RedZonaStatus.Add(reader.GetValue(1).ToString(), SqlLite.CheckingTheRedZone(reader.GetValue(0).ToString(), RedZona[reader.GetValue(1).ToString()].ToString()));
+                                    string roudline = SqlLite.CheckingTheRedZone(reader.GetValue(0).ToString(), RedZona[reader.GetValue(1).ToString()].ToString());
+                                    RedZonaStatus.Add(reader.GetValue(1).ToString(), roudline);
+
+                                    Logs.WriteLine($">>>>> Recognizing Camera {reader.GetValue(1)} added to status monitoring, number of cars {cars}, number of overview photos {imgCount}, {roudline} percentage in the red light zone.");
                                 }
                             }
                         }
