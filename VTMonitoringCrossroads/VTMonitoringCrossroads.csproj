@@ -92,6 +92,7 @@
     <Compile Include="SqlLite.cs" />
     <Compile Include="TimeAccuracy.cs" />
     <Compile Include="Timer.cs" />
+    <Compile Include="TrafficLight.cs" />
     <Compile Include="Web.cs" />
   </ItemGroup>
   <ItemGroup>

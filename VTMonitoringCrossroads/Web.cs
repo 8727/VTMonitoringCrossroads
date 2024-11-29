@@ -72,6 +72,19 @@ namespace VTMonitoringCrossroads
             }
             json += "\n\t]";
 
+            json += ",\n\t\"trafficLightStatus\":[";
+            int tl = 0;
+            foreach (DictionaryEntry TrafficLightStatusKey in Service.TrafficLightStatus)
+            {
+                tl++;
+                json += "\n\t\t{\n\t\t\t\"ip\":\"" + TrafficLightStatusKey.Key + "\",\n\t\t\t\"status\":\"" + TrafficLightStatusKey.Value + "\"\n\t\t}";
+                if (tl < Service.TrafficLightStatus.Count)
+                {
+                    json += ",";
+                }
+            }
+            json += "\n\t]";
+
             json += ",\n\t\"timeAccuracy\":[";
             int t = 0;
             foreach (DictionaryEntry TimeAccuracysKey in Service.TimeAccuracys)

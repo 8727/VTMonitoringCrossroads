@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Xml;
 using System.Data;
 using Microsoft.Win32;
 using System.Collections;
@@ -8,14 +9,14 @@ using System.Configuration;
 using System.Data.SqlClient;
 using System.ServiceProcess;
 using System.Text.RegularExpressions;
-using System.Xml;
+
 
 
 namespace VTMonitoringCrossroads
 {
     public partial class Service : ServiceBase
     {
-        public static string version = "1.4";
+        public static string version = "1.5";
 
         public Service()
         {
@@ -37,6 +38,9 @@ namespace VTMonitoringCrossroads
         public static Hashtable RedZona = new Hashtable();
         public static Hashtable RedZonaStatus = new Hashtable();
 
+        public static Hashtable RecognizingCameraTrafficLight = new Hashtable();
+        public static Hashtable TrafficLightStatus = new Hashtable();
+
         public static int storageDays = 35;
         public static bool statusWeb = true;
         public static string installDir = "C:\\Vocord\\Vocord.Traffic Crossroads\\";
@@ -46,6 +50,15 @@ namespace VTMonitoringCrossroads
         public static string ipTrafficLight = "192.168.88.39";
         public static string ipTahiont = "192.168.88.20";
         public static string ipCA = "192.168.88.30";
+
+        public static int inputTrafficLight = 8;
+        public static string trafficLightType = "inode";
+        public static int trafficLightRequestIntervalSeconds = 10;
+        public static int trafficLightSignalBrokenMinutes = 5;
+        public static int trafficLightSignalCount = ((trafficLightSignalBrokenMinutes * 60) / trafficLightRequestIntervalSeconds) -1;
+        public static bool[] statusTrafficLight = new bool[inputTrafficLight];
+        public static bool[] oldInputTrafficLight = new bool[inputTrafficLight];
+        public static int[] countTrafficLight = new int[inputTrafficLight];
 
         static string RoadLineNumber(string id)
         {
@@ -145,6 +158,11 @@ namespace VTMonitoringCrossroads
 
                 ipTahiont = ConfigurationManager.AppSettings["IpTahiont"];
                 ipCA = ConfigurationManager.AppSettings["IpCA"];
+
+                trafficLightType = ConfigurationManager.AppSettings["TrafficLightType"];
+                trafficLightRequestIntervalSeconds = Convert.ToInt32(ConfigurationManager.AppSettings["TrafficLightRequestIntervalSeconds"]);
+                trafficLightSignalBrokenMinutes = Convert.ToInt32(ConfigurationManager.AppSettings["TrafficLightSignalBrokenMinutes"]);
+                trafficLightSignalCount = ((trafficLightSignalBrokenMinutes * 60) / trafficLightRequestIntervalSeconds) -1;
             }
 
             using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Vocord\VOCORD Traffic CrossRoads Server"))
@@ -191,6 +209,10 @@ namespace VTMonitoringCrossroads
                                     RedZona.Add(reader.GetValue(1).ToString(), GetRoadLine(reader.GetValue(0).ToString()));
                                     string roudline = SqlLite.CheckingTheRedZone(reader.GetValue(0).ToString(), RedZona[reader.GetValue(1).ToString()].ToString());
                                     RedZonaStatus.Add(reader.GetValue(1).ToString(), roudline);
+
+                                    TrafficLight.AddSignalsCamera(reader.GetValue(1).ToString(), reader.GetValue(0).ToString());
+
+                                    TrafficLightStatus.Add(reader.GetValue(1).ToString(), "0");
 
                                     Logs.WriteLine($">>>>> Recognizing Camera {reader.GetValue(1)} added to status monitoring, number of cars {cars}, number of overview photos {imgCount}, {roudline} percentage in the red light zone.");
                                 }
@@ -267,7 +289,7 @@ namespace VTMonitoringCrossroads
 
             if (File.Exists(installDir + @"Database\bpm.db"))
             {
-                string sqlTrafficLight = "SELECT Ip FROM Modbus";
+                string sqlTrafficLight = "SELECT Ip, PinCount FROM Modbus";
 
                 using (var connection = new SQLiteConnection($@"URI=file:{installDir}Database\bpm.db"))
                 {
@@ -282,9 +304,13 @@ namespace VTMonitoringCrossroads
                                 while (reader.Read())
                                 {
                                     ipTrafficLight = reader.GetValue(0).ToString();
-                                    Logs.WriteLine($">>>>> Traffic light {ipTrafficLight} added to status monitoring.");
+                                    inputTrafficLight = int.Parse(reader.GetValue(1).ToString());
                                 }
                             }
+                            Array.Resize(ref statusTrafficLight, inputTrafficLight);
+                            Array.Resize(ref oldInputTrafficLight, inputTrafficLight);
+                            Array.Resize(ref countTrafficLight, inputTrafficLight);
+                            Logs.WriteLine($">>>>> Traffic light {ipTrafficLight} added to status monitoring, {inputTrafficLight} signals, signal loss interval {trafficLightSignalBrokenMinutes} minute.");
                         }
                     }
                     catch (SqlException)
@@ -315,6 +341,11 @@ namespace VTMonitoringCrossroads
             hostStatusTimer.Elapsed += Timer.OnHostStatusTimer;
             hostStatusTimer.AutoReset = true;
             hostStatusTimer.Enabled = true;
+
+            var trafficLightTimer = new System.Timers.Timer(trafficLightRequestIntervalSeconds * 1000);
+            trafficLightTimer.Elapsed += TrafficLight.OnTrafficLightTimer;
+            trafficLightTimer.AutoReset = true;
+            trafficLightTimer.Enabled = true;
 
             Logs.WriteLine($">>>>> Monitoring host parameters at {dataUpdateInterval} minute intervals.");
             Logs.WriteLine("-------------------------------------------------------------------------------");

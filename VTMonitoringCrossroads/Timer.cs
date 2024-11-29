@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using System.Timers;
 
 namespace VTMonitoringCrossroads
@@ -73,13 +74,41 @@ namespace VTMonitoringCrossroads
                 Service.RedZonaStatus[ipRecognizingCameraKey] = percentageRedZona;
 
                 Logs.WriteLine($"Camera recognition {ipRecognizingCameraKey}, number of cars {Service.RecognizingCameraStatus[ipRecognizingCameraKey]}, number of overview photos {imgCount}, time difference {Service.TimeAccuracys[ipRecognizingCameraKey]} seconds, {percentageRedZona} percentage in the red light zone.");
+
+                int messagebit = 0;
+                string messageDI = "";
+                foreach (int x in ((Int32[])Service.RecognizingCameraTrafficLight[ipRecognizingCameraKey]))
+                {
+                    if(x != -1)
+                    {
+                        if (Service.statusTrafficLight[x])
+                        {
+                            messagebit +=  1 << x;
+                        }
+                    }
+                }
+                string signalCamera = Convert.ToString(messagebit, 2);
+
+                Service.TrafficLightStatus[ipRecognizingCameraKey] = signalCamera;
+
+                for (int i = 0; i < 16; i++)
+                {
+                    if ((messagebit & (1 << i)) != 0) 
+                    {
+                        messageDI += $", 'DI-{i}'";
+                    }
+                }
+                if(messageDI != "")
+                {
+                    Logs.WriteLine($"Camera recognition {ipRecognizingCameraKey}, problems with signals {messageDI}");
+                }
             }
 
             TimeAccuracy.SetWinTime(Service.ipTahiont, $"http://{Service.ipTahiont}:8020");
             Logs.WriteLine($"The time difference on server {Service.ipTahiont} is {Service.TimeAccuracys[Service.ipTahiont]} seconds.");
             TimeAccuracy.SetWinTime(Service.ipCA, $"http://{Service.ipCA}:8030");
             Logs.WriteLine($"The time difference on server {Service.ipCA} is {Service.TimeAccuracys[Service.ipCA]} seconds.");
-            //-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
             foreach (string ipViewCameraKey in viewCameraKeys)
             {
@@ -92,6 +121,14 @@ namespace VTMonitoringCrossroads
                     Logs.WriteLine($"Camera Status Overview {ipViewCameraKey} is not available.");
                 }
             }
+//-------------------------------------------------------------------------------------------------
+
+            string message = "";
+            for (int i = 0; i < Service.statusTrafficLight.Length; i++)
+            {
+                message += (Service.statusTrafficLight[i]) ? $", 'DI-{i} ERROR'" : $", 'DI-{i} OK'";
+            }
+            Logs.WriteLine($"Traffic light controller signal statuses{message}.");
 //-------------------------------------------------------------------------------------------------
 
             Logs.WriteLine("-------------------------------------------------------------------------------");
