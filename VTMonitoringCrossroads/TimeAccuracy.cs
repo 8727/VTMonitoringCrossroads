@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Globalization;
 using System.Net.Http;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 
@@ -43,7 +43,7 @@ namespace VTMonitoringCrossroads
                     var json = await response.Content.ReadAsStringAsync();
                     var datajson = new JavaScriptSerializer().Deserialize<dynamic>(json);
                     string winTime = datajson["dateTime"];
-                    DateTime endDateTime = DateTime.ParseExact(winTime, "d.M.yyyy H:mm:ss", CultureInfo.InvariantCulture);
+                    DateTime endDateTime = DateTime.ParseExact(winTime, "d.M.yyyy H:m:s.fff", CultureInfo.InvariantCulture);
                     content = DateTime.Now.Subtract(endDateTime).TotalSeconds.ToString();
                 }
             }

@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Data.SQLite;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 namespace VTMonitoringCrossroads
 {

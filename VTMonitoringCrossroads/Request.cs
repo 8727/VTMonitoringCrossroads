@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Threading;
+using System.Net.NetworkInformation;
 
 
 namespace VTMonitoringCrossroads

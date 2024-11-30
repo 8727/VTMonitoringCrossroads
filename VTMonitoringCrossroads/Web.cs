@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections;
-using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Collections;
+using System.Diagnostics;
 
 namespace VTMonitoringCrossroads
 {
@@ -38,7 +38,7 @@ namespace VTMonitoringCrossroads
             //string key = HttpResponse.Request.QueryString["key"];
             string json = "{\n\t\"version\":\"" + Service.version + "\"";
 
-            json += ",\n\t\"dateTime\":\"" + DateTime.Now.ToString() + "\"";
+            json += ",\n\t\"dateTime\":\"" + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss.fff") + "\"";
 
             json += ",\n\t\"upTime\":\"" + Service.StatusJson["UpTime"] + "\"";
 

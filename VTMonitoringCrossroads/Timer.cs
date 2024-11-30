@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Linq;
 using System.Timers;
+using System.Collections;
 
 namespace VTMonitoringCrossroads
 {
