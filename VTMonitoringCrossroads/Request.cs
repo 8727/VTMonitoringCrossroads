@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Net.NetworkInformation;
+using System.ServiceProcess;
 
 
 namespace VTMonitoringCrossroads
@@ -10,6 +11,17 @@ namespace VTMonitoringCrossroads
     internal class Request
     {
         static DriveInfo driveInfo = new DriveInfo(Service.diskMonitoring);
+
+        public static void StatusNTPService()
+        {
+            ServiceController service = new ServiceController("Network Time Protocol Daemon");
+            if (service.Status == ServiceControllerStatus.Stopped)
+            {
+                Console.WriteLine($">>>> Service {"Network Time Protocol Daemon"} status >>>> {service.Status} <<<<");
+                service.Start();
+                Console.WriteLine($">>>> Service {"Network Time Protocol Daemon"} status >>>> {service.Status} <<<<");
+            }
+        }
 
         public static byte GetPing(string ip)
         {
@@ -78,7 +90,7 @@ namespace VTMonitoringCrossroads
                 lastSent = ipv4Info.BytesSent;
                 speed = Convert.ToUInt16(adapter.Speed / 1000000);
             }
-            string[] req = {speed.ToString(), ((lastReceived - oldReceived) / 131072.0).ToString(), ((lastSent - oldSent) / 131072.0).ToString() };
+            string[] req = {speed.ToString(), ((lastReceived - oldReceived) / 131072.0).ToString().Replace(",", "."), ((lastSent - oldSent) / 131072.0).ToString().Replace(",", ".") };
             return req;
         }
 

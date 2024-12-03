@@ -26,10 +26,10 @@ namespace VTMonitoringCrossroads
             Logs.WriteLine($"Host uptime {uptime}.");
 //-------------------------------------------------------------------------------------------------
 
-            Service.StatusJson["DiskTotalSize"] = (Request.GetDiskTotalSize() / 1_073_741_824.0).ToString();
-            Service.StatusJson["DiskTotalFreeSpace"] = (Request.GetDiskTotalFreeSpace() / 1_073_741_824.0).ToString();
-            Service.StatusJson["DiskPercentSize"] = (Request.GetDiskUsagePercentage()).ToString();
-            Service.StatusJson["DiskPercentFreeSpace"] = (Request.GetDiskPercentFreeSpace()).ToString();
+            Service.StatusJson["DiskTotalSize"] = ((Request.GetDiskTotalSize() / 1_073_741_824.0).ToString()).Replace(",", ".");
+            Service.StatusJson["DiskTotalFreeSpace"] = (Request.GetDiskTotalFreeSpace() / 1_073_741_824.0).ToString().Replace(",", ".");
+            Service.StatusJson["DiskPercentSize"] = (Request.GetDiskUsagePercentage().ToString()).Replace(",", ".");
+            Service.StatusJson["DiskPercentFreeSpace"] = (Request.GetDiskPercentFreeSpace()).ToString().Replace(",", ".");
             Logs.WriteLine($"Total disk size {Service.StatusJson["DiskTotalSize"]} GB, free space size {Service.StatusJson["DiskTotalFreeSpace"]} GB, disk size as a percentage {Service.StatusJson["DiskPercentSize"]}, free disk space percentage {Service.StatusJson["DiskPercentFreeSpace"]}.");
 //-------------------------------------------------------------------------------------------------
 
@@ -128,7 +128,9 @@ namespace VTMonitoringCrossroads
                 message += (Service.statusTrafficLight[i]) ? $", 'DI-{i} ERROR'" : $", 'DI-{i} OK'";
             }
             Logs.WriteLine($"Traffic light controller signal statuses{message}.");
-//-------------------------------------------------------------------------------------------------
+            //-------------------------------------------------------------------------------------------------
+
+            Request.StatusNTPService();
 
             Logs.WriteLine("-------------------------------------------------------------------------------");
         }

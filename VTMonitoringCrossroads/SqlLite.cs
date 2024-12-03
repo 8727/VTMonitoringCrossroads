@@ -108,16 +108,16 @@ namespace VTMonitoringCrossroads
 
         public static string CheckingTheRedZone(string id, string line)
         {
-            string response = "100,00";
+            string response = "100.00";
             if (line != "-1")
             {
                 long dateTime = DateTime.UtcNow.AddHours(-1).ToFileTime();
                 string sqlQuery = $"SELECT round(100 * (SELECT COUNT(*) FROM CARS WHERE CHANNEL_ID = '{id}' AND ROADLINE = {line} AND CHECKTIME > {dateTime} AND ALARM14 = 1) / ((SELECT COUNT(*) FROM CARS WHERE CHANNEL_ID = '{id}' AND ROADLINE = {line} AND CHECKTIME > {dateTime})+0.0), 2) as body";
-                response = SQLQueryString(sqlQuery).ToString();
+                response = SQLQueryString(sqlQuery).ToString().Replace(",", ".");
             }
             if(response == "")
             {
-                response = "0,00";
+                response = "0.00";
             }
             return response;
         }

@@ -20,7 +20,7 @@ namespace VTMonitoringCrossroads
                     HttpResponseMessage response = await httpClient.SendAsync(request);
                     string factorTime = await response.Content.ReadAsStringAsync();
                     DateTime endDateTime = DateTime.ParseExact(factorTime.Remove(19), "yyyy-M-d H:mm:ss", CultureInfo.InvariantCulture);
-                    content = DateTime.Now.Subtract(endDateTime).TotalSeconds.ToString();
+                    content = DateTime.Now.Subtract(endDateTime).TotalSeconds.ToString().Replace(",", ".");
                 }
             }
             catch
@@ -44,7 +44,7 @@ namespace VTMonitoringCrossroads
                     var datajson = new JavaScriptSerializer().Deserialize<dynamic>(json);
                     string winTime = datajson["dateTime"];
                     DateTime endDateTime = DateTime.ParseExact(winTime, "d.M.yyyy H:m:s.fff", CultureInfo.InvariantCulture);
-                    content = DateTime.Now.Subtract(endDateTime).TotalSeconds.ToString();
+                    content = DateTime.Now.Subtract(endDateTime).TotalSeconds.ToString().Replace(",", ".");
                 }
             }
             catch
