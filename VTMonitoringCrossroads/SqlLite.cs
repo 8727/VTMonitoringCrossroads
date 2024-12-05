@@ -125,8 +125,13 @@ namespace VTMonitoringCrossroads
         public static string PathToLastFolder(string id)
         {
             string sqlQuery = $"SELECT SCREENSHOT FROM CARS WHERE CHANNEL_ID = '{id}' ORDER BY CHECKTIME DESC LIMIT 1";
+            string response = "";
             string pach = SQLQueryString(sqlQuery).ToString();
-            return pach.Remove(pach.LastIndexOf('\\'));
+            if(pach != "-1")
+            {
+                response = pach.Remove(pach.LastIndexOf('\\'));
+            }
+            return response;
         }
 
         public static string ArchiveNumberOfCarsOfTheFuture()
