@@ -82,7 +82,7 @@ namespace VTMonitoringCrossroads
                     {
                         if (Service.statusTrafficLight[x])
                         {
-                            messagebit +=  1 << x;
+                            messagebit |= 1 << x;
                         }
                     }
                 }
