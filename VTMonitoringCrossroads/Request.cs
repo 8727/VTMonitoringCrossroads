@@ -17,9 +17,9 @@ namespace VTMonitoringCrossroads
             ServiceController service = new ServiceController("Network Time Protocol Daemon");
             if (service.Status == ServiceControllerStatus.Stopped)
             {
-                Console.WriteLine($">>>> Service {"Network Time Protocol Daemon"} status >>>> {service.Status} <<<<");
+                Logs.WriteLine($">>>> Service {"Network Time Protocol Daemon"} status >>>> {service.Status} <<<<");
                 service.Start();
-                Console.WriteLine($">>>> Service {"Network Time Protocol Daemon"} status >>>> {service.Status} <<<<");
+                Logs.WriteLine($">>>> Service {"Network Time Protocol Daemon"} status >>>> {service.Status} <<<<");
             }
         }
 
